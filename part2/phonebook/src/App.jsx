@@ -15,7 +15,7 @@ const App = () => {
 			setPersons(data);
 		};
 
-		const promise = axios.get(" http://localhost:3001/persons");
+		const promise = axios.get("http://localhost:3001/persons");
 		promise.then((response) => onLoad(response.data));
 	}, []);
 
@@ -28,7 +28,12 @@ const App = () => {
 				number: newNumber,
 				id: newName,
 			};
-			setPersons(persons.concat(newPerson));
+			axios
+				.post("http://localhost:3001/persons", newPerson)
+				.then((response) => {
+					console.log(response.data);
+					setPersons(persons.concat(response.data));
+				});
 			setNewName("");
 			setNewNumber("");
 		} else {
