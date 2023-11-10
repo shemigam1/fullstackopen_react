@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import Form from "./components/Form";
 import Name from "./components/Name";
-import axios from "axios";
+import { create, deletePerson, getAll } from "./services/personService";
 
 const App = () => {
 	const [persons, setPersons] = useState([]);
@@ -15,8 +15,7 @@ const App = () => {
 			setPersons(data);
 		};
 
-		const promise = axios.get("http://localhost:3001/persons");
-		promise.then((response) => onLoad(response.data));
+		getAll().then((data) => onLoad(data));
 	}, []);
 
 	const handleSubmit = (event) => {
@@ -28,12 +27,8 @@ const App = () => {
 				number: newNumber,
 				id: newName,
 			};
-			axios
-				.post("http://localhost:3001/persons", newPerson)
-				.then((response) => {
-					console.log(response.data);
-					setPersons(persons.concat(response.data));
-				});
+			create(newPerson).then((data) => setPersons(persons.concat(data)));
+
 			setNewName("");
 			setNewNumber("");
 		} else {
@@ -74,6 +69,23 @@ const App = () => {
 		setNewSearch(true);
 	};
 
+	const handleDelete = (e) => {
+		const target = e.target.name;
+		let modPersons = [];
+		let modPersonsBefore = [];
+		let modPersonsAfter = [];
+		for (let i = 0; i < persons.length; i++) {
+			if (persons[i].name === target) {
+				modPersonsBefore = persons.slice(0, i);
+				modPersonsAfter = persons.slice(i + 1);
+			}
+		}
+		// console.log(persons[0].name);
+		modPersons = modPersonsBefore.concat(modPersonsAfter);
+
+		deletePerson(target).then(() => setPersons(modPersons));
+	};
+
 	return (
 		<div>
 			<h2>Phonebook</h2>
@@ -92,7 +104,12 @@ const App = () => {
 			<div className="">
 				{personsToShow.map((person) => {
 					return (
-						<Name name={person.name} number={person.number} key={person.id} />
+						<Name
+							name={person.name}
+							number={person.number}
+							key={person.id}
+							handleDelete={handleDelete}
+						/>
 					);
 				})}
 			</div>
